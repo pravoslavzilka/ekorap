@@ -3,8 +3,7 @@ from openai import OpenAI
 from threading import Thread
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
-import socket
-
+from models import *
 
 
 
@@ -23,7 +22,7 @@ app.config['MAIL_USE_SSL'] = True
 
 mail = Mail(app)
 
-test_data = {"Knihy": 53,
+test_data = {"Knihy": 50,
              "Dekorácie":60,
              "Platne": 50}
 
@@ -34,9 +33,14 @@ def index():
     return "sd"
 
 
-@app.route("/matching")
+@app.route("/matching/<input_data>/")
 def matching_algo(input_data):
+    for key, value in test_data.items():
+        items = FormItem.query.filter((FormItem.name == key) & (FormItem.count <= value)).all()
+        for item in items:
+            print(item.name)
 
+    return "0"
 
 
 
