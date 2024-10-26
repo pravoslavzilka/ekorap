@@ -44,6 +44,38 @@ def matching_algo(input_data):
     return 0
 
 
+@app.route("/login_check")
+def login_check():
+    data = { "email": "d.vagala@gmail.com",
+            "password": "asdfasdfa"}
+
+    user = User.query.filter(User.email == data["email"]).first()
+    if user:
+        if user.check_password(data["password"]):
+            return "yes"
+
+
+    return "no"
+
+
+@app.route("/registration_form")
+def registration_form():
+    data = {
+      "name": "Katolicka charita",
+      "email": "d.vagala@gmail.com",
+      "ico": "23432",
+      "contact_name": "Dominik Vagala",
+    }
+
+    user = User(data["name"], " ", " ")
+    user.email = data["contact_name"]
+    user.ico = int(data["ico"])
+
+    return "success"
+
+
+
+
 @app.route("/receive")
 def receive_order():
     data = {
@@ -92,7 +124,7 @@ def receive_order():
 @app.route("/confirm-order")
 def confirm_order():
     data = {
-        "order_id": "12",
+        "order_id": "1",
         "organization_email": "pravoslav.zilka@gmail.com",
         "products": [
             {
@@ -110,8 +142,13 @@ def confirm_order():
     products_dict = {product["name"]: product["reserved_amount"] for product in data["products"]}
 
     order = Order.query.filter(Order.id == order_id).first()
-    for item in order.items():
-        for product, value in products_dict.values():
+
+    if not order:
+        return "failed, order wasn't found"
+
+
+    for item in order.order_items:
+        for product, value in products_dict.items():
             if product == item.name:
                 item.count = value
 
@@ -122,6 +159,9 @@ def confirm_order():
     recipient = order.user.email
 
     email_send(subject, body, recipient)
+
+
+    return "success"
 
 
 
