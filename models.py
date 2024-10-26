@@ -9,7 +9,7 @@ class Admin(Base):
     __tablename__ = "admins"
     id = Column(Integer, primary_key=True)
     email = Column(String(150))
-    paasword = Column(String(300))
+    password = Column(String(300))
 
     def __init__(self, email):
         self.email = email
@@ -30,9 +30,10 @@ class User(Base):
     address = Column(String(300))
     Ico = Column(Integer)
     email = Column(String(150))
-    paasword = Column(String(300))
+    password = Column(String(300))
 
     form_items = relationship("FormItem", back_populates="user")
+    orders = relationship("Order", back_populates="user")
 
 
 
@@ -61,6 +62,35 @@ class FormItem(Base):
     def __init__(self, name, count):
         self.name = name
         self.count = count
+
+
+
+class Order(Base):
+    __tablename__ = "orders"
+    id = Column(Integer, primary_key=True)
+    state = Column(String)
+    date = Column(Date)
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    user = relationship("User", back_populates="orders", foreign_keys=[user_id])
+    order_items = relationship("OrderItem", back_populates="order")
+
+
+
+class OrderItem(Base):
+    __tablename__ = "orderitems"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(300))
+    count = Column(Float)
+    order_id = Column(Integer, ForeignKey("orders.id"))
+
+    order = relationship("Order", back_populates="order_items", foreign_keys=[order_id])
+
+    def __init__(self, name, count):
+        self.name = name
+        self.count = count
+
+
 
 
 
