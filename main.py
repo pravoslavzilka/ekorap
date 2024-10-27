@@ -1,5 +1,4 @@
-from flask import Flask, request
-from openai import OpenAI
+from flask import Flask, request, jsonify
 from threading import Thread
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
@@ -32,6 +31,40 @@ test_data = {"Knihy": 50,
 def index():
     email_sending()
     return "sd"
+
+
+@app.route("/load-data")
+def load_data():
+    data = [
+  {
+    "parent_category": "furniture",
+    "products": [
+      {
+        "name": "lamp",
+        "available_amount": 50
+      },
+      {
+        "name": "beds",
+        "available_amount": 50
+      }
+    ]
+  },
+  {
+    "parent_category": "elektro",
+    "products": [
+      {
+        "name": "pc",
+        "available_amount": 50
+      },
+      {
+        "name": "flashlight",
+        "available_amount": 50
+      }
+    ]
+  }
+]
+
+    return jsonify(data)
 
 
 @app.route("/matching/<input_data>/")
