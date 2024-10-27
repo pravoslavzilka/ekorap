@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from threading import Thread
 from itsdangerous import URLSafeTimedSerializer
 from flask_mail import Mail, Message
@@ -27,10 +27,14 @@ test_data = {"Knihy": 50,
              "Platne": 50}
 
 
-@app.route("/")
-def index():
-    email_sending()
-    return "sd"
+@app.route("/<json>/")
+def index(json):
+    response = make_response("test")
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+    return response
 
 
 @app.route("/load-data")
@@ -64,7 +68,12 @@ def load_data():
   }
 ]
 
-    return jsonify(data)
+    response = make_response(jsonify(data))
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+    return response
 
 
 @app.route("/matching/<input_data>/")
@@ -74,37 +83,61 @@ def matching_algo(input_data):
         for item in items:
             print(item.name)
 
-    return 0
+    response = make_response("done")
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers[
+        'Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+    return response
 
 
-@app.route("/login_check")
+@app.route("/login_check", methods=["POST"])
 def login_check():
-    data = { "email": "d.vagala@gmail.com",
-            "password": "asdfasdfa"}
+    email =  request.form["email"]
+    password = request.form["password"]
 
-    user = User.query.filter(User.email == data["email"]).first()
+    user = User.query.filter(User.email == email).first()
     if user:
-        if user.check_password(data["password"]):
-            return "yes"
+        if user.check_password(password):
+            response = make_response("yes")
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Credentials'] = 'true'
+            response.headers[
+                'Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+            response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+            return response
+
+    response = make_response("no")
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers[
+        'Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+    return response
 
 
-    return "no"
 
-
-@app.route("/registration_form")
+@app.route("/registration_form", methods=["POST"])
 def registration_form():
     data = {
-      "name": "Katolicka charita",
-      "email": "d.vagala@gmail.com",
-      "ico": "23432",
+      "name": request.form["name"],
+      "email": request.form["email"],
+      "ico": request.form["ico"],
       "contact_name": "Dominik Vagala",
     }
 
     user = User(data["name"], " ", " ")
-    user.email = data["contact_name"]
+    user.email = data["email"]
     user.ico = int(data["ico"])
 
-    return "success"
+    response = make_response("success")
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers[
+        'Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+    return response
 
 
 
@@ -145,13 +178,18 @@ def receive_order():
     #send email
 
     subject = f"The {u.name} organization have sent material request"
-    body = "Organisation wants to have these items: " + list_of_items + "\n Order Id: " + order.id
+    body = "Organisation wants to have these items: " + list_of_items + "\n Order Id: " + str(order.id)
     recipient = u.email
 
     email_send(subject, body, recipient)
 
-
-    return "success"
+    response = make_response("success")
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers[
+        'Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+    response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+    return response
 
 
 @app.route("/confirm-order")
@@ -177,7 +215,13 @@ def confirm_order():
     order = Order.query.filter(Order.id == order_id).first()
 
     if not order:
-        return "failed, order wasn't found"
+        response = make_response("Order was not found")
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers[
+            'Access-Control-Allow-Headers'] = 'Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale'
+        response.headers['Access-Control-Allow-Methods'] = 'POST, PUT, OPTIONS, DELETE, GET'
+        return response
 
 
     for item in order.order_items:
